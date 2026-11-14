@@ -110,3 +110,35 @@ MLQ is a general-purpose way of separating process types and does not guarantee 
 
 ### VIII. Conclusion
 Through this activity I learned how Multilevel Queue, Rate Monotonic, and Earliest Deadline First scheduling work and how they differ. I wrote Python simulations, read Gantt charts, computed waiting time, turnaround time, CPU utilization, and deadline compliance, and used GitHub to organize, commit, and document my work.
+
+### IX. Guide Questions and Answers
+
+**1. What is the main difference between Multilevel Queue and Multilevel Feedback Queue scheduling?**
+In Multilevel Queue, a process is assigned to one queue permanently (for example, by process type) and never moves. In Multilevel Feedback Queue, processes can move between queues based on their behavior, for example a process that uses too much CPU time is moved to a lower-priority queue, and a process that waits too long can be moved up.
+
+**2. Why does MLQ use different scheduling algorithms for different process queues?**
+Different kinds of processes have different needs. Interactive processes need fast response, so they use Round Robin with a small time quantum. Batch processes need to finish their work with little switching overhead, so FCFS suits them. Using one algorithm for both would favor one type and hurt the other.
+
+**3. How does RMS determine which task receives the CPU first?**
+RMS gives the CPU to the ready task with the shortest period, because the shortest period has the highest priority. In this lab, T1 (4 ms) goes first, then T2 (5 ms), then T3 (10 ms).
+
+**4. Why is RMS considered a fixed-priority scheduling algorithm?**
+The priority is based on the task's period, and the period never changes. So each task keeps the same priority during the whole run. T1 is always higher than T2 and T3.
+
+**5. How does EDF determine which task should execute next?**
+EDF looks at all ready tasks and runs the one with the earliest absolute deadline (release time + relative deadline). If two tasks tie, the program uses the earlier release time and then the task ID.
+
+**6. Why is EDF considered a dynamic-priority scheduling algorithm?**
+Because the priority is not fixed to a task. It is recalculated from the absolute deadlines of the jobs that are ready at that moment. Each new release of a task gets a new absolute deadline, so which task is highest priority changes over time.
+
+**7. What happens when a newly released task has an earlier deadline than the currently running task under EDF?**
+The new task preempts the running task and takes the CPU. The interrupted task goes back to the ready state with its remaining execution time and continues later. Example from the output: at 12 ms, T1 (deadline 16) is released and preempts T3 (deadline 20). T3 resumes at 13 ms.
+
+**8. Why is CPU utilization important in real-time scheduling?**
+It shows how much of the CPU the task set needs (the sum of C/T). It is used to check whether the tasks can be scheduled before running them. If utilization is above 100%, the tasks cannot all meet their deadlines. In this lab, the utilization is 65%, which leaves spare capacity.
+
+**9. Can a task set with CPU utilization below 100% still miss a deadline? Explain the conditions under which this may happen.**
+Yes. Under RMS, a task set whose utilization is above the sufficient bound (about 77.98% for three tasks) may miss a deadline, although it is not guaranteed to. Under EDF, utilization of 100% or less only guarantees success under the classical assumptions: one processor, independent and preemptible tasks, deadlines equal to periods, and no overhead. If these assumptions are broken, for example by context-switching overhead, tasks that block each other, deadlines shorter than periods, or non-preemptible sections, a deadline can be missed even below 100%.
+
+**10. Which algorithm would you recommend for periodic real-time tasks, RMS or EDF? Justify your answer.**
+I would recommend EDF. It can use the CPU up to 100% under the classical assumptions, while RMS is only guaranteed up to about 77.98% for three tasks, so EDF gives more room for additional tasks. In this lab both met all deadlines with the same schedule, but EDF has more headroom. RMS is still a good choice when simplicity and predictable fixed priorities matter, because it is easier to implement and behaves more predictably when the system is overloaded.
